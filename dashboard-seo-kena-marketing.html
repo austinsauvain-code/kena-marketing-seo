@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Audit SEO — KENA MARKETING</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@700;900&display=swap');
+
+:root {
+  --primary: #6366F1;
+  --primary-light: #818CF8;
+  --secondary: #8B5CF6;
+  --success: #10B981;
+  --success-light: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-light: #FEF3C7;
+  --danger: #EF4444;
+  --danger-light: #FEE2E2;
+  --info: #3B82F6;
+  --neutral: #64748B;
+  --bg: #F1F0FB;
+  --card-bg: #FFFFFF;
+  --text: #1E293B;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --gradient-1: linear-gradient(135deg, #6366F1, #8B5CF6);
+  --gradient-2: linear-gradient(135deg, #3B82F6, #6366F1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(99,102,241,0.10);
+  --shadow-lg: 0 8px 32px rgba(99,102,241,0.12);
+  --radius: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0F0E1A;
+    --card-bg: #1A1930;
+    --text: #E2E8F0;
+    --text-muted: #64748B;
+    --border: #2D2B50;
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--gradient-1);
+  border-radius: var(--radius);
+  padding: 40px 48px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -60%; right: -10%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -40%; left: 20%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.header-content { position: relative; z-index: 1; }
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.header-sub {
+  font-size: 1.05rem;
+  opacity: 0.88;
+  font-weight: 300;
+}
+.header-meta {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.header-meta span {
+  font-size: 0.82rem;
+  background: rgba(255,255,255,0.18);
+  padding: 4px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 5px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text); background: var(--bg); }
+.tab-btn.active {
+  background: var(--gradient-1);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.35s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── KPI CARDS ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 4px;
+}
+.kpi-card.kpi-danger::before { background: var(--danger); }
+.kpi-card.kpi-warning::before { background: var(--warning); }
+.kpi-card.kpi-success::before { background: var(--success); }
+.kpi-card.kpi-info::before { background: var(--info); }
+.kpi-card.kpi-primary::before { background: var(--gradient-1); }
+.kpi-card.kpi-secondary::before { background: var(--secondary); }
+.kpi-icon {
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+.kpi-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+.kpi-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 500;
+}
+.kpi-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.kpi-badge.bad { background: var(--danger-light); color: var(--danger); }
+.kpi-badge.ok { background: var(--warning-light); color: #B45309; }
+.kpi-badge.good { background: var(--success-light); color: #065F46; }
+
+/* ── CHART GRID ── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.chart-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+.chart-card.full-width { grid-column: 1 / -1; }
+.chart-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chart-title span { font-size: 1.1rem; }
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+.chart-container canvas { width: 100% !important; }
+
+/* ── TABLE ── */
+.table-wrapper {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 28px;
+  overflow-x: auto;
+}
+.table-wrapper h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+thead th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--card-bg);
+}
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tbody tr:hover { background: rgba(99,102,241,0.04); }
+.progress-bar {
+  background: var(--bg);
+  border-radius: 6px;
+  height: 8px;
+  width: 100%;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s ease;
+}
+.severity-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.severity-critique { background: var(--danger-light); color: var(--danger); }
+.severity-haute { background: #FEF3C7; color: #B45309; }
+.severity-moyenne { background: #E0E7FF; color: #4338CA; }
+.severity-basse { background: #F1F5F9; color: #64748B; }
+
+/* ── RECOMMENDATIONS ── */
+.reco-section { margin-bottom: 28px; }
+.health-score-container {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.health-gauge { flex-shrink: 0; }
+.health-text h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+.health-text p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+.reco-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+  border-left: 5px solid;
+  transition: transform 0.2s ease;
+}
+.reco-card:hover { transform: translateX(4px); }
+.reco-card.prio-critique { border-left-color: var(--danger); }
+.reco-card.prio-haute { border-left-color: var(--warning); }
+.reco-card.prio-moyenne { border-left-color: var(--primary); }
+.reco-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.reco-header h4 { font-size: 0.95rem; font-weight: 700; }
+.reco-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--primary);
+}
+.reco-body { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
+.reco-actions {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 0.83rem;
+}
+.reco-actions ul { list-style: none; padding: 0; }
+.reco-actions li { padding: 3px 0; }
+.reco-actions li::before { content: '→ '; color: var(--primary); font-weight: 700; }
+.reco-impact {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+.impact-eleve { background: var(--success-light); color: #065F46; }
+.impact-moyen { background: var(--warning-light); color: #B45309; }
+
+.gains-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.gain-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.gain-card .gain-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--success);
+}
+.gain-card .gain-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── ACTION PLAN ── */
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 12px; top: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--border);
+  border-radius: 2px;
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 28px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--primary);
+  background: var(--card-bg);
+}
+.timeline-item.done::before { background: var(--success); border-color: var(--success); }
+.timeline-phase {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.timeline-item h4 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+.timeline-item p { font-size: 0.85rem; color: var(--text-muted); }
+.timeline-score {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--primary);
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .dashboard { padding: 12px; }
+  .header { padding: 24px; }
+  .header h1 { font-size: 1.5rem; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .health-score-container { flex-direction: column; text-align: center; }
+  .tabs { overflow-x: auto; }
+  .tab-btn { font-size: 0.78rem; padding: 10px 12px; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-content">
+      <h1>Audit SEO — KENA MARKETING</h1>
+      <div class="header-sub">Analyse complète du site kena-ms.com · Agence marketing digital · Toulouse</div>
+      <div class="header-meta">
+        <span>📅 14 avril 2026</span>
+        <span>🌐 4 pages auditées</span>
+        <span>📊 7 catégories évaluées</span>
+        <span>⚠️ 25 problèmes identifiés</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 Vue d'ensemble</button>
+    <button class="tab-btn" onclick="switchTab('details')">🔍 Détails par page</button>
+    <button class="tab-btn" onclick="switchTab('issues')">⚠️ Problèmes</button>
+    <button class="tab-btn" onclick="switchTab('plan')">🗓️ Plan d'action</button>
+    <button class="tab-btn" onclick="switchTab('recos')">💡 Recommandations</button>
+  </div>
+
+  <!-- TAB: OVERVIEW -->
+  <div id="tab-overview" class="tab-content active">
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-danger">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-value">29<span style="font-size:1rem;font-weight:400;opacity:0.6">/100</span></div>
+        <div class="kpi-label">Score SEO global</div>
+        <span class="kpi-badge bad">Critique</span>
+      </div>
+      <div class="kpi-card kpi-danger">
+        <div class="kpi-icon">📝</div>
+        <div class="kpi-value">~950</div>
+        <div class="kpi-label">Mots totaux sur le site</div>
+        <span class="kpi-badge bad">Min. 800/page</span>
+      </div>
+      <div class="kpi-card kpi-warning">
+        <div class="kpi-icon">🖼️</div>
+        <div class="kpi-value">83%</div>
+        <div class="kpi-label">Images sans alt</div>
+        <span class="kpi-badge bad">20/24 images</span>
+      </div>
+      <div class="kpi-card kpi-danger">
+        <div class="kpi-icon">🤖</div>
+        <div class="kpi-value">22<span style="font-size:1rem;font-weight:400;opacity:0.6">/100</span></div>
+        <div class="kpi-label">Score E-E-A-T</div>
+        <span class="kpi-badge bad">Très faible</span>
+      </div>
+      <div class="kpi-card kpi-info">
+        <div class="kpi-icon">📄</div>
+        <div class="kpi-value">4</div>
+        <div class="kpi-label">Pages indexées</div>
+        <span class="kpi-badge ok">Très limité</span>
+      </div>
+      <div class="kpi-card kpi-primary">
+        <div class="kpi-icon">🚀</div>
+        <div class="kpi-value">80</div>
+        <div class="kpi-label">Score cible à 6 mois</div>
+        <span class="kpi-badge good">+51 points</span>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title"><span>📊</span> Scores par catégorie SEO</div>
+        <div class="chart-container"><canvas id="chartRadar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>🏗️</span> Points obtenus vs. maximum</div>
+        <div class="chart-container"><canvas id="chartPoints"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>⚠️</span> Répartition des problèmes par sévérité</div>
+        <div class="chart-container"><canvas id="chartSeverity"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>📈</span> Trajectoire de score estimée</div>
+        <div class="chart-container"><canvas id="chartTrajectory"></canvas></div>
+      </div>
+      <div class="chart-card full-width">
+        <div class="chart-title"><span>📐</span> Score E-E-A-T détaillé</div>
+        <div class="chart-container" style="max-height:300px"><canvas id="chartEEAT"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DETAILS -->
+  <div id="tab-details" class="tab-content">
+    <div class="kpi-grid" style="margin-bottom:20px">
+      <div class="kpi-card kpi-danger">
+        <div class="kpi-icon">🏠</div>
+        <div class="kpi-value">Accueil</div>
+        <div class="kpi-label">~250 mots · Viewport ❌ · Canonical ❌</div>
+        <span class="kpi-badge bad">Critique</span>
+      </div>
+      <div class="kpi-card kpi-warning">
+        <div class="kpi-icon">🛠️</div>
+        <div class="kpi-value">Services</div>
+        <div class="kpi-label">~180 mots · H6 au lieu de H2 · 89% alt ❌</div>
+        <span class="kpi-badge bad">Critique</span>
+      </div>
+      <div class="kpi-card kpi-warning">
+        <div class="kpi-icon">ℹ️</div>
+        <div class="kpi-value">À propos</div>
+        <div class="kpi-label">~314 mots · H3 avant H2 · 67% alt ❌</div>
+        <span class="kpi-badge ok">Mince</span>
+      </div>
+      <div class="kpi-card kpi-info">
+        <div class="kpi-icon">📞</div>
+        <div class="kpi-value">Contact</div>
+        <div class="kpi-label">~200 mots · Viewport ❌ · Canonical ❌</div>
+        <span class="kpi-badge ok">Acceptable</span>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title"><span>📝</span> Nombre de mots par page</div>
+        <div class="chart-container"><canvas id="chartWords"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>🖼️</span> Images : avec alt vs sans alt</div>
+        <div class="chart-container"><canvas id="chartImages"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Table: Audit détaillé par page -->
+    <div class="table-wrapper">
+      <h3>🔎 Matrice d'audit par page</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Page</th>
+            <th>Viewport</th>
+            <th>Canonical</th>
+            <th>Title</th>
+            <th>Meta desc.</th>
+            <th>Open Graph</th>
+            <th>Schema</th>
+            <th>Hiérarchie H</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Accueil</strong></td>
+            <td style="color:var(--danger)">❌ Manquant</td>
+            <td style="color:var(--danger)">❌ Manquant</td>
+            <td style="color:var(--warning)">⚠️ Sous-optimal</td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--danger)">❌ Manquant</td>
+            <td style="color:var(--warning)">⚠️ WebSite (invalide)</td>
+            <td style="color:var(--success)">✅ OK</td>
+          </tr>
+          <tr>
+            <td><strong>Services</strong></td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--warning)">⚠️ Faute</td>
+            <td style="color:var(--warning)">⚠️ Partiel</td>
+            <td style="color:var(--warning)">⚠️ WebPage basique</td>
+            <td style="color:var(--danger)">❌ H6 au lieu H2</td>
+          </tr>
+          <tr>
+            <td><strong>À propos</strong></td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--warning)">⚠️ Marque répétée</td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--warning)">⚠️ Partiel</td>
+            <td style="color:var(--warning)">⚠️ WebPage basique</td>
+            <td style="color:var(--warning)">⚠️ H3 avant H2</td>
+          </tr>
+          <tr>
+            <td><strong>Contact</strong></td>
+            <td style="color:var(--danger)">❌ Manquant</td>
+            <td style="color:var(--danger)">❌ Manquant</td>
+            <td style="color:var(--warning)">⚠️ Marque répétée</td>
+            <td style="color:var(--success)">✅ OK</td>
+            <td style="color:var(--danger)">❌ Manquant</td>
+            <td style="color:var(--warning)">⚠️ WebPage basique</td>
+            <td style="color:var(--success)">✅ OK</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table: Schemas -->
+    <div class="table-wrapper">
+      <h3>📦 Données structurées — État actuel vs recommandé</h3>
+      <table>
+        <thead>
+          <tr><th>Schéma</th><th>Statut</th><th>Priorité</th><th>Impact</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>LocalBusiness / ProfessionalService</td><td style="color:var(--danger)">❌ Absent</td><td><span class="severity-badge severity-critique">Critique</span></td><td>Knowledge Panel, local pack</td></tr>
+          <tr><td>Service (×6 via ItemList)</td><td style="color:var(--danger)">❌ Absent</td><td><span class="severity-badge severity-critique">Critique</span></td><td>Visibilité services SERP</td></tr>
+          <tr><td>BreadcrumbList</td><td style="color:var(--danger)">❌ Absent</td><td><span class="severity-badge severity-haute">Haute</span></td><td>Fil d'Ariane dans Google</td></tr>
+          <tr><td>Review / AggregateRating</td><td style="color:var(--danger)">❌ Absent</td><td><span class="severity-badge severity-haute">Haute</span></td><td>Étoiles dans les SERP</td></tr>
+          <tr><td>FAQPage</td><td style="color:var(--danger)">❌ Absent</td><td><span class="severity-badge severity-haute">Haute</span></td><td>Rich results + GEO</td></tr>
+          <tr><td>ContactPage</td><td style="color:var(--warning)">⚠️ WebPage générique</td><td><span class="severity-badge severity-moyenne">Moyenne</span></td><td>Précision sémantique</td></tr>
+          <tr><td>AboutPage</td><td style="color:var(--warning)">⚠️ WebPage générique</td><td><span class="severity-badge severity-basse">Basse</span></td><td>Sémantique améliorée</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: ISSUES -->
+  <div id="tab-issues" class="tab-content">
+    <div class="chart-grid" style="margin-bottom:20px">
+      <div class="chart-card">
+        <div class="chart-title"><span>🔴</span> Répartition des problèmes</div>
+        <div class="chart-container"><canvas id="chartIssuesPie"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>📂</span> Problèmes par domaine</div>
+        <div class="chart-container"><canvas id="chartIssuesDomain"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <h3>⚠️ Liste complète des 25 problèmes identifiés</h3>
+      <table id="issuesTable">
+        <thead>
+          <tr><th>#</th><th>Problème</th><th>Sévérité</th><th>Domaine</th><th>Effort</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: ACTION PLAN -->
+  <div id="tab-plan" class="tab-content">
+    <div class="chart-grid" style="margin-bottom:24px">
+      <div class="chart-card full-width">
+        <div class="chart-title"><span>📈</span> Score projeté par phase</div>
+        <div class="chart-container" style="max-height:300px"><canvas id="chartPlan"></canvas></div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 0 — Semaine 1</div>
+        <h4>⚖️ Conformité légale</h4>
+        <p>Mentions légales (LCEN), politique de confidentialité (RGPD), email professionnel contact@kena-ms.com. Obligatoire avant toute autre action.</p>
+        <span class="timeline-score">Obligation légale</span>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 1 — Semaines 1-2</div>
+        <h4>🔧 Corrections techniques</h4>
+        <p>robots.txt, viewport, canonicals, attributs alt (20 images), schéma LocalBusiness, hiérarchie des titres H. Effort estimé : ~4h.</p>
+        <span class="timeline-score">Score estimé : 45-50 / 100</span>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 2 — Semaines 2-4</div>
+        <h4>📄 Optimisation On-Page</h4>
+        <p>Balises title optimisées, Open Graph complet, Google Maps page Contact, corrections mineures (fautes, favicon, headers sécurité).</p>
+        <span class="timeline-score">Score estimé : 55-60 / 100</span>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 3 — Mois 2-3</div>
+        <h4>✍️ Création de contenu</h4>
+        <p>Enrichir chaque page (300-500 mots/service), blog (2 articles/mois, 1500+ mots), études de cas (3-5), FAQ structurée (10-15 questions).</p>
+        <span class="timeline-score">Score estimé : 65-75 / 100</span>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 4 — Mois 3-6</div>
+        <h4>🏆 Autorité et présence</h4>
+        <p>LinkedIn & Instagram, Google Business Profile optimisé, pages services localisées ("Marketing digital Toulouse"), llms.txt, backlinks.</p>
+        <span class="timeline-score">Score estimé : 75-85 / 100</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: RECOMMENDATIONS -->
+  <div id="tab-recos" class="tab-content">
+    <div class="reco-section">
+      <!-- Health Score -->
+      <div class="health-score-container">
+        <div class="health-gauge">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#E2E8F0" stroke-width="10"/>
+            <circle cx="70" cy="70" r="58" fill="none" stroke="var(--danger)" stroke-width="10"
+              stroke-dasharray="364.4" stroke-dashoffset="258.7"
+              stroke-linecap="round" transform="rotate(-90 70 70)"/>
+            <text x="70" y="62" text-anchor="middle" font-family="'Playfair Display',serif" font-size="36" font-weight="900" fill="var(--danger)">2.9</text>
+            <text x="70" y="82" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="13" fill="var(--text-muted)">/10</text>
+          </svg>
+        </div>
+        <div class="health-text">
+          <h3>🔴 Score de santé : 2,9/10</h3>
+          <p>Le site présente des lacunes critiques en conformité légale, contenu, données structurées et optimisation mobile. Les bases techniques sont partiellement en place (HTTPS, CDN, URLs propres), mais le contenu extrêmement mince et l'absence de signaux d'expertise bloquent toute visibilité organique et IA. La trajectoire de correction est réaliste avec un plan d'action structuré.</p>
+        </div>
+      </div>
+
+      <!-- Priorité critique -->
+      <h3 style="margin-bottom:12px;font-size:1.05rem">🔴 Priorité critique</h3>
+
+      <div class="reco-card prio-critique">
+        <div class="reco-header">
+          <h4>Créer immédiatement les pages légales obligatoires</h4>
+          <span class="reco-tag">⚖️ Conformité</span>
+        </div>
+        <div class="reco-body">Aucune mention légale (LCEN) ni politique de confidentialité (RGPD) malgré un formulaire collectant nom, téléphone, email. Risque juridique réel — sanctions CNIL possibles jusqu'à 20 M€ ou 4% du CA.</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Rédiger les mentions légales avec SIRET, éditeur, hébergeur (Hostinger)</li>
+            <li>Rédiger la politique de confidentialité avec finalités, durée de conservation, droits utilisateurs</li>
+            <li>Ajouter une case de consentement au formulaire de contact</li>
+            <li>Remplacer kenamarketings@gmail.com par contact@kena-ms.com</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-eleve">Impact : Élevé — Obligation légale + crédibilité</span>
+      </div>
+
+      <div class="reco-card prio-critique">
+        <div class="reco-header">
+          <h4>Résoudre le contenu mince : passer de ~950 mots à 5 000+ mots</h4>
+          <span class="reco-tag">📝 Contenu</span>
+        </div>
+        <div class="reco-body">Le site totalise environ 950 mots, soit moins qu'un seul article de blog bien optimisé. Google et les IA ne citeront jamais un site aussi pauvre. Score Contenu : 20/100, score GEO : 10/100.</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Enrichir la page Services : 300-500 mots par service (×6), processus, bénéfices, CTA</li>
+            <li>Étendre la page À propos à 800+ mots : histoire, équipe, certifications, valeurs</li>
+            <li>Lancer un blog avec 2 articles/mois de 1 500+ mots ciblant "marketing digital Toulouse"</li>
+            <li>Créer 3-5 études de cas chiffrées (avant/après) — objectif E-E-A-T</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-eleve">Impact : Élevé — +15-20 points de score, visibilité organique</span>
+      </div>
+
+      <!-- Priorité haute -->
+      <h3 style="margin:20px 0 12px;font-size:1.05rem">🟠 Priorité haute</h3>
+
+      <div class="reco-card prio-haute">
+        <div class="reco-header">
+          <h4>Corriger les 5 points techniques bloquants en priorité</h4>
+          <span class="reco-tag">⚙️ Technique</span>
+        </div>
+        <div class="reco-body">robots.txt en erreur 504, viewport manquant sur 2/4 pages (impact mobile-first), canonicals absentes sur Accueil et Contact, 20/24 images sans alt, hiérarchie H cassée.</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Créer un robots.txt valide avec Allow: / et lien sitemap (~10 min)</li>
+            <li>Ajouter la balise viewport sur Accueil et Contact (~5 min)</li>
+            <li>Ajouter les canonicals manquantes (~5 min)</li>
+            <li>Rédiger des alt descriptifs pour les 20 images (~1h)</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-eleve">Impact : Élevé — +15-20 points, 2-3h d'effort total</span>
+      </div>
+
+      <div class="reco-card prio-haute">
+        <div class="reco-header">
+          <h4>Implémenter les données structurées LocalBusiness + Service</h4>
+          <span class="reco-tag">📦 Schema</span>
+        </div>
+        <div class="reco-body">Score Schema actuel : 15/100. Aucun schéma LocalBusiness — le site est invisible dans le local pack Google. Aucun schéma Service pour les 6 offres, aucun BreadcrumbList, aucune FAQ structurée.</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Ajouter le JSON-LD ProfessionalService sur toutes les pages (code fourni dans l'audit)</li>
+            <li>Ajouter le schéma Service ItemList sur la page Services</li>
+            <li>Implémenter BreadcrumbList sur les pages internes</li>
+            <li>Créer une FAQ de 10-15 questions + schéma FAQPage</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-eleve">Impact : Élevé — Knowledge Panel, rich results, SEO local</span>
+      </div>
+
+      <div class="reco-card prio-haute">
+        <div class="reco-header">
+          <h4>Créer et optimiser le Google Business Profile</h4>
+          <span class="reco-tag">📍 Local</span>
+        </div>
+        <div class="reco-body">Aucun profil Google Business détecté. C'est le facteur n°1 du SEO local. Score local estimé : 30/100. Seulement 2 témoignages clients, un seul réseau social (TikTok).</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Créer le profil GBP avec photos professionnelles, description complète, horaires</li>
+            <li>Solliciter des avis Google : objectif 10+ avis en 3 mois</li>
+            <li>Intégrer Google Maps sur la page Contact</li>
+            <li>Créer des pages localisées : "Marketing digital Toulouse", "Community management Toulouse"</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-eleve">Impact : Élevé — Visibilité locale et crédibilité</span>
+      </div>
+
+      <!-- Priorité moyenne -->
+      <h3 style="margin:20px 0 12px;font-size:1.05rem">🟡 Priorité moyenne</h3>
+
+      <div class="reco-card prio-moyenne">
+        <div class="reco-header">
+          <h4>Renforcer les signaux E-E-A-T pour les moteurs et les IA</h4>
+          <span class="reco-tag">🤖 Expertise</span>
+        </div>
+        <div class="reco-body">Score E-E-A-T : 22/100. Aucune biographie d'équipe, aucune certification visible (Google Ads, Meta Blueprint, HubSpot), aucun portfolio, un seul réseau social. Pour une agence marketing, c'est un paradoxe de crédibilité.</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Ajouter des bios d'équipe avec photos, certifications, expériences</li>
+            <li>Créer un profil LinkedIn entreprise (critique pour le B2B)</li>
+            <li>Créer un fichier llms.txt pour guider les LLM</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-moyen">Impact : Moyen — Crédibilité et citabilité IA</span>
+      </div>
+
+      <div class="reco-card prio-moyenne">
+        <div class="reco-header">
+          <h4>Optimiser les balises title et Open Graph</h4>
+          <span class="reco-tag">🏷️ On-Page</span>
+        </div>
+        <div class="reco-body">"Page d'accueil" gaspille des caractères dans le title de l'Accueil. Aucune image og:image — le site est invisible sur les réseaux sociaux (pas de prévisualisation). Nom de marque répété dans 2 titles.</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Accueil → "Agence Marketing Digital à Toulouse | KENA MARKETING"</li>
+            <li>Créer une image OG de marque (1200×630px) pour tous les partages sociaux</li>
+            <li>Ajouter og:title, og:description, og:image, og:url sur les 4 pages</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-moyen">Impact : Moyen — CTR social et SERP</span>
+      </div>
+
+      <div class="reco-card prio-moyenne">
+        <div class="reco-header">
+          <h4>Améliorer la performance serveur (HTTP/2) et la sécurité</h4>
+          <span class="reco-tag">⚡ Performance</span>
+        </div>
+        <div class="reco-body">Score Performance : 65/100 (le meilleur du site). Le serveur sert en HTTP/1.1 malgré le support H3 annoncé. Headers Referrer-Policy et Permissions-Policy manquants.</div>
+        <div class="reco-actions">
+          <ul>
+            <li>Activer HTTP/2 ou HTTP/3 chez Hostinger</li>
+            <li>Ajouter Referrer-Policy et Permissions-Policy</li>
+            <li>Précharger les polices critiques (Rubik, Raleway)</li>
+          </ul>
+        </div>
+        <span class="reco-impact impact-moyen">Impact : Moyen — CWV et sécurité</span>
+      </div>
+
+      <!-- Gains estimés -->
+      <h3 style="margin:24px 0 12px;font-size:1.05rem">🎯 Gains estimés du plan d'action complet</h3>
+      <div class="gains-grid">
+        <div class="gain-card">
+          <div class="gain-value">+51 pts</div>
+          <div class="gain-label">Score SEO (29 → 80)</div>
+        </div>
+        <div class="gain-card">
+          <div class="gain-value">×5</div>
+          <div class="gain-label">Volume de contenu</div>
+        </div>
+        <div class="gain-card">
+          <div class="gain-value">100%</div>
+          <div class="gain-label">Conformité légale</div>
+        </div>
+        <div class="gain-card">
+          <div class="gain-value">6 mois</div>
+          <div class="gain-label">Délai pour objectif 80/100</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Dashboard généré automatiquement | Données : FULL-AUDIT-REPORT.md + ACTION-PLAN.md | 14 avril 2026<br>
+    Audit SEO pour <strong>KENA MARKETING</strong> — kena-ms.com | Produit par Artheau Aviation
+  </div>
+</div>
+
+<script>
+// ── Tab Switching ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── Color palette ──
+const C = {
+  primary: '#6366F1', primaryLight: '#818CF8', secondary: '#8B5CF6',
+  success: '#10B981', warning: '#F59E0B', danger: '#EF4444',
+  info: '#3B82F6', neutral: '#94A3B8',
+  bg: '#F1F0FB', border: '#E2E8F0'
+};
+const palette = [C.primary, C.secondary, C.info, C.success, C.warning, C.danger, C.neutral, C.primaryLight];
+
+// ── Chart defaults ──
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#64748B';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.padding = 16;
+
+// ── 1. Radar: Scores par catégorie ──
+new Chart(document.getElementById('chartRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['Technique', 'Contenu', 'On-Page', 'Schema', 'Performance', 'IA / GEO', 'Images'],
+    datasets: [{
+      label: 'Score actuel',
+      data: [35, 20, 35, 15, 65, 10, 15],
+      backgroundColor: 'rgba(99,102,241,0.15)',
+      borderColor: C.primary,
+      pointBackgroundColor: C.primary,
+      borderWidth: 2
+    },{
+      label: 'Objectif 6 mois',
+      data: [80, 75, 80, 70, 85, 60, 85],
+      backgroundColor: 'rgba(16,185,129,0.08)',
+      borderColor: C.success,
+      pointBackgroundColor: C.success,
+      borderWidth: 2,
+      borderDash: [5,5]
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 25, font:{size:10} }, grid:{color:'#E2E8F0'}, pointLabels:{font:{size:11,weight:'bold'}} } }
+  }
+});
+
+// ── 2. Bar: Points obtenus vs max ──
+new Chart(document.getElementById('chartPoints'), {
+  type: 'bar',
+  data: {
+    labels: ['Technique (22)', 'Contenu (23)', 'On-Page (20)', 'Schema (10)', 'Perf. (10)', 'IA/GEO (10)', 'Images (5)'],
+    datasets: [{
+      label: 'Points obtenus',
+      data: [7.7, 4.6, 7.0, 1.5, 6.5, 1.0, 0.75],
+      backgroundColor: C.primary,
+      borderRadius: 6
+    },{
+      label: 'Points restants',
+      data: [22-7.7, 23-4.6, 20-7.0, 10-1.5, 10-6.5, 10-1.0, 5-0.75],
+      backgroundColor: '#E2E8F0',
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: { x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, grid:{color:'#F1F5F9'}} },
+    plugins: { tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' pts' }}}
+  }
+});
+
+// ── 3. Doughnut: Sévérité ──
+new Chart(document.getElementById('chartSeverity'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Critique (9)', 'Haute (6)', 'Moyenne (7)', 'Basse (4)'],
+    datasets: [{
+      data: [9, 6, 7, 4],
+      backgroundColor: [C.danger, C.warning, C.primary, C.neutral],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '65%',
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ── 4. Line: Trajectoire score ──
+new Chart(document.getElementById('chartTrajectory'), {
+  type: 'line',
+  data: {
+    labels: ['Actuel', 'S1-2\n(Tech)', 'S2-4\n(On-Page)', 'M2-3\n(Contenu)', 'M3-6\n(Autorité)'],
+    datasets: [{
+      label: 'Score estimé',
+      data: [29, 47, 57, 70, 80],
+      borderColor: C.primary,
+      backgroundColor: 'rgba(99,102,241,0.08)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 6,
+      pointBackgroundColor: '#fff',
+      pointBorderColor: C.primary,
+      pointBorderWidth: 3
+    },{
+      label: 'Seuil acceptable (60)',
+      data: [60,60,60,60,60],
+      borderColor: C.success,
+      borderDash: [8,4],
+      pointRadius: 0,
+      borderWidth: 1.5,
+      fill: false
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: { y:{beginAtZero:true, max:100, grid:{color:'#F1F5F9'}}, x:{grid:{display:false}} },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ── 5. Horizontal Bar: E-E-A-T ──
+new Chart(document.getElementById('chartEEAT'), {
+  type: 'bar',
+  data: {
+    labels: ['Expérience (20%)', 'Expertise (25%)', 'Autorité (25%)', 'Fiabilité (30%)'],
+    datasets: [{
+      label: 'Score actuel',
+      data: [15, 22, 18, 30],
+      backgroundColor: [C.danger, C.warning, C.danger, C.warning],
+      borderRadius: 6
+    },{
+      label: 'Objectif',
+      data: [60, 70, 65, 75],
+      backgroundColor: ['rgba(239,68,68,0.15)','rgba(245,158,11,0.15)','rgba(239,68,68,0.15)','rgba(245,158,11,0.15)'],
+      borderColor: [C.danger,C.warning,C.danger,C.warning],
+      borderWidth: 1.5,
+      borderDash: [4,4],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: { x:{beginAtZero:true, max:100, grid:{color:'#F1F5F9'}}, y:{grid:{display:false}} },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ── 6. Bar: Words per page ──
+new Chart(document.getElementById('chartWords'), {
+  type: 'bar',
+  data: {
+    labels: ['Accueil', 'Services', 'À propos', 'Contact'],
+    datasets: [{
+      label: 'Mots actuels',
+      data: [250, 180, 314, 200],
+      backgroundColor: C.danger,
+      borderRadius: 6
+    },{
+      label: 'Minimum recommandé',
+      data: [800, 1000, 600, 300],
+      backgroundColor: 'rgba(16,185,129,0.2)',
+      borderColor: C.success,
+      borderWidth: 1.5,
+      borderDash: [4,4],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: { y:{beginAtZero:true, grid:{color:'#F1F5F9'}}, x:{grid:{display:false}} },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ── 7. Stacked Bar: Images alt ──
+new Chart(document.getElementById('chartImages'), {
+  type: 'bar',
+  data: {
+    labels: ['Services', 'À propos'],
+    datasets: [{
+      label: 'Alt présent',
+      data: [2, 2],
+      backgroundColor: C.success,
+      borderRadius: 6
+    },{
+      label: 'Alt manquant',
+      data: [16, 4],
+      backgroundColor: C.danger,
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: { x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, grid:{color:'#F1F5F9'}} },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ── 8. Issues tab doughnut ──
+new Chart(document.getElementById('chartIssuesPie'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Critique', 'Haute', 'Moyenne', 'Basse'],
+    datasets: [{ data: [9,6,7,4], backgroundColor: [C.danger, C.warning, C.primary, C.neutral], borderWidth: 0 }]
+  },
+  options: { responsive: true, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+});
+
+// ── 9. Issues by domain ──
+new Chart(document.getElementById('chartIssuesDomain'), {
+  type: 'bar',
+  data: {
+    labels: ['Contenu / E-E-A-T', 'Technique', 'On-Page', 'Schema', 'SEO Local', 'Images', 'GEO / IA'],
+    datasets: [{
+      label: 'Nombre de problèmes',
+      data: [7, 5, 4, 3, 3, 2, 2],
+      backgroundColor: palette,
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: { x:{beginAtZero:true, grid:{color:'#F1F5F9'}}, y:{grid:{display:false}} },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ── 10. Plan score projection ──
+new Chart(document.getElementById('chartPlan'), {
+  type: 'line',
+  data: {
+    labels: ['Actuel\n(Avr. 2026)', 'Fin S2\n(Mai 2026)', 'Fin S4\n(Mai 2026)', 'Fin M3\n(Juil. 2026)', 'Fin M6\n(Oct. 2026)'],
+    datasets: [{
+      label: 'Score projeté (fourchette haute)',
+      data: [29, 50, 60, 75, 85],
+      borderColor: C.success,
+      backgroundColor: 'rgba(16,185,129,0.08)',
+      fill: '+1',
+      tension: 0.3,
+      pointRadius: 5,
+      pointBackgroundColor: '#fff',
+      pointBorderColor: C.success,
+      pointBorderWidth: 2
+    },{
+      label: 'Score projeté (fourchette basse)',
+      data: [29, 45, 55, 65, 75],
+      borderColor: C.info,
+      backgroundColor: 'rgba(59,130,246,0.05)',
+      fill: false,
+      tension: 0.3,
+      pointRadius: 5,
+      pointBackgroundColor: '#fff',
+      pointBorderColor: C.info,
+      pointBorderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: { y:{beginAtZero:true, max:100, grid:{color:'#F1F5F9'}}, x:{grid:{display:false}} },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// ── Issues Table ──
+const issues = [
+  {n:1, issue:"Mentions Légales manquantes (LCEN)", sev:"Critique", domain:"Conformité", effort:"1h"},
+  {n:2, issue:"Politique de Confidentialité manquante (RGPD)", sev:"Critique", domain:"Conformité", effort:"2h"},
+  {n:3, issue:"Contenu extrêmement mince (~950 mots total)", sev:"Critique", domain:"Contenu", effort:"8h+"},
+  {n:4, issue:"robots.txt inaccessible (erreur 504)", sev:"Critique", domain:"Technique", effort:"10 min"},
+  {n:5, issue:"Viewport manquant sur Accueil et Contact", sev:"Critique", domain:"Technique", effort:"5 min"},
+  {n:6, issue:"20/24 images sans attribut alt", sev:"Critique", domain:"Images", effort:"1h"},
+  {n:7, issue:"Schema LocalBusiness absent", sev:"Critique", domain:"Schema", effort:"1h"},
+  {n:8, issue:"Aucun blog ou contenu éditorial", sev:"Critique", domain:"Contenu", effort:"8h/mois"},
+  {n:9, issue:"Aucun signal d'expertise (E-E-A-T)", sev:"Critique", domain:"Contenu", effort:"4h"},
+  {n:10, issue:"Canonical manquant Accueil + Contact", sev:"Haute", domain:"Technique", effort:"5 min"},
+  {n:11, issue:"Open Graph manquant/incomplet", sev:"Haute", domain:"On-Page", effort:"1h"},
+  {n:12, issue:"Hiérarchie titres H incorrecte (H6)", sev:"Haute", domain:"On-Page", effort:"15 min"},
+  {n:13, issue:"Pas d'études de cas ni portfolio", sev:"Haute", domain:"Contenu", effort:"6h"},
+  {n:14, issue:"Pas de Google Maps page Contact", sev:"Haute", domain:"SEO Local", effort:"15 min"},
+  {n:15, issue:"Pas de FAQ structurée", sev:"Haute", domain:"Contenu", effort:"2h"},
+  {n:16, issue:"Email Gmail au lieu du domaine", sev:"Moyenne", domain:"Crédibilité", effort:"30 min"},
+  {n:17, issue:"Headers sécurité manquants", sev:"Moyenne", domain:"Technique", effort:"15 min"},
+  {n:18, issue:"Faute meta description Services", sev:"Moyenne", domain:"On-Page", effort:"5 min"},
+  {n:19, issue:"Titles sous-optimaux", sev:"Moyenne", domain:"On-Page", effort:"10 min"},
+  {n:20, issue:"Un seul réseau social (TikTok)", sev:"Moyenne", domain:"Autorité", effort:"2h+"},
+  {n:21, issue:"Pas de fichier llms.txt", sev:"Moyenne", domain:"GEO / IA", effort:"30 min"},
+  {n:22, issue:"Pas de pages services localisées", sev:"Moyenne", domain:"SEO Local", effort:"6h"},
+  {n:23, issue:"Favicon vide (base64)", sev:"Basse", domain:"On-Page", effort:"10 min"},
+  {n:24, issue:"Hreflang inconsistant", sev:"Basse", domain:"Technique", effort:"15 min"},
+  {n:25, issue:"HTTP/1.1 au lieu de HTTP/2+", sev:"Basse", domain:"Performance", effort:"Config."},
+];
+
+const tbody = document.querySelector('#issuesTable tbody');
+issues.forEach(i => {
+  const sevClass = i.sev === 'Critique' ? 'severity-critique' : i.sev === 'Haute' ? 'severity-haute' : i.sev === 'Moyenne' ? 'severity-moyenne' : 'severity-basse';
+  tbody.innerHTML += `<tr>
+    <td>${i.n}</td>
+    <td>${i.issue}</td>
+    <td><span class="severity-badge ${sevClass}">${i.sev}</span></td>
+    <td>${i.domain}</td>
+    <td>${i.effort}</td>
+  </tr>`;
+});
+</script>
+</body>
+</html>
